@@ -5,7 +5,8 @@ require_once '../vendor/autoload.php';
 
 use MongoDB\Client;
 
-$client = new Client;
+// Connect to MongoDB
+$client = new MongoDB\Client;
 $database = $client->mydatabase; // Replace 'mydatabase' with your actual database name
 $collection = $database->users;
 
@@ -15,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check for duplicate ID Number
     $existingUser = $collection->findOne(['idNumber' => $idNumber]);
     if ($existingUser) {
-        echo 'Duplicate ID Number. Please check your input.';
+        echo 'This ID Number already exists. Please check your input.';
     }
 }
 

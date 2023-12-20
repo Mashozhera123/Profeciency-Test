@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-</head>
-   <style>
+    <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -60,7 +59,6 @@
             color: #ff0000;
             margin-top: -10px;
             margin-bottom: 10px;
-            display: block; /* Make the error messages block elements */
         }
     </style>
 </head>
@@ -78,87 +76,75 @@
         <span id="idNumberError" class="error"></span>
 
         <label for="dob">Date of Birth (dd/mm/YYYY):</label>
-        <input type="text" id="dob" name="dob" pattern="\d{2}/\d{2}/\d{4}" required placeholder="Enter your date of birth">
+        <input type="text" id="dob" name="dob" required placeholder="Enter your date of birth">
         <span id="dobError" class="error"></span>
 
         <button type="submit">Submit</button>
         <button type="button" onclick="window.location.href='queries/cancel.php'">Cancel</button>
     </form>
-<script>
-            function validateForm() {
 
-                // Checking for duplicate ID Number using AJAX
-                var idNumber = document.getElementById('idNumber').value;
+    <script>
+        var timer;
 
-                // Creating a new XMLHttpRequest object
-                var xhr = new XMLHttpRequest();
+        document.getElementById('dob').addEventListener('input', function () {
+            clearTimeout(timer);
+            // Validate date after a short delay
+            timer = setTimeout(function () {
+                validateDate();
+            }, 500);
+        });
 
-                // Configuring it to make a POST request to the server-side PHP script
-                xhr.open('POST', 'queries/check_duplicate_id.php', true);
-                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        function validateForm() {
+            // Checking for duplicate ID Number using AJAX
+            var idNumber = document.getElementById('idNumber').value;
 
-                // Setting up a callback function to handle the response from the server
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState == 4 && xhr.status == 200) {
-                        // Response from the server
-                        var response = xhr.responseText;
+            // Creating a new XMLHttpRequest object
+            var xhr = new XMLHttpRequest();
 
-                        // Display the error message if the ID Number is duplicate
-                        document.getElementById('idNumberError').innerText = response;
+            // Configuring it to make a POST request to the server-side PHP script
+            xhr.open('POST', 'queries/check_duplicate_id.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-                        // If response is empty, no duplicate ID Number, proceed with form submission
-                        if (!response.trim()) {
-                            // Additional validation checks...
-                            if (validateDate()) {
-                                submitForm();
-                            }
+            // Setting up a callback function to handle the response from the server
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    // Response from the server
+                    var response = xhr.responseText;
+
+                    // Display the error message if the ID Number is duplicate
+                    document.getElementById('idNumberError').innerText = response;
+
+                    // If response is empty, no duplicate ID Number, proceed with form submission
+                    if (!response.trim()) {
+                        // Additional validation checks...
+                        if (validateDate()) {
+                            document.forms[0].submit();
                         }
                     }
-                };
+                }
+            };
 
-                // Send the ID Number to the server
-                xhr.send('idNumber=' + encodeURIComponent(idNumber));
+            // Send the ID Number to the server
+            xhr.send('idNumber=' + encodeURIComponent(idNumber));
 
-                // Prevent the form from being submitted immediately
+            // Prevent the form from being submitted immediately
+            return false;
+        }
+
+        function validateDate() {
+            var dobInput = document.getElementById('dob');
+            var dobValue = dobInput.value;
+
+            // Checking if the entered date matches the pattern dd/mm/YYYY
+            var dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+            if (!dateRegex.test(dobValue)) {
+                document.getElementById('dobError').innerText = 'Please enter a valid date in the format dd/mm/YYYY.';
                 return false;
+            } else {
+                document.getElementById('dobError').innerText = '';
+                return true;
             }
-
-            function submitForm() {
-                document.forms[0].submit();
-            }
-
-            function validateDate() {
-                var dobInput = document.getElementById('dob');
-                var dobValue = dobInput.value;
-
-                // Checking if the entered date matches the pattern dd/mm/YYYY
-                var dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
-                if (!dateRegex.test(dobValue)) {
-                    document.getElementById('dobError').innerText = 'Please enter a valid date in the format dd/mm/YYYY.';
-                    return false;
-                }
-
-                // Split the date into day, month, and year
-                var parts = dobValue.split('/');
-                var day = parseInt(parts[0], 10);
-                var month = parseInt(parts[1], 10);
-                var year = parseInt(parts[2], 10);
-
-                // Check if the entered date is a valid date
-                var enteredDate = new Date(year, month - 1, day);
-                if (
-                    isNaN(enteredDate.getDate()) ||
-                    enteredDate.getMonth() !== month - 1 ||
-                    enteredDate.getFullYear() !== year
-                ) {
-                    document.getElementById('dobError').innerText = 'Please enter a valid date.';
-                    return false;
-                }
-
-                // Additional checks if needed...
-
-                return true;  // Return true if date is valid
-            }
-            
+        }
     </script>
+</body>
 </html>
