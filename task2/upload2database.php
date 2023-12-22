@@ -86,7 +86,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+<div class="container">
         <h2>Upload CSV to SQLite Database</h2>
 
         <form action="" method="post" enctype="multipart/form-data">
@@ -100,9 +100,16 @@
         </form>
 
         <?php
+
+set_time_limit(300);  // Set to 0 for no time limit
+ini_set('memory_limit', '512M');  // Adjust the memory limit as needed
+
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Handle CSV upload and SQLite insertion
             if (isset($_FILES["csv-file"]) && $_FILES["csv-file"]["error"] == UPLOAD_ERR_OK) {
+                set_time_limit(0);  // Set to 0 for no time limit
+                ini_set('memory_limit', '512M');  // Adjust the memory limit as needed
+
                 $targetDir = "uploads/";
                 $targetFile = $targetDir . basename($_FILES["csv-file"]["name"]);
                 $uploadOk = 1;
@@ -137,9 +144,11 @@
                         // Read CSV file and insert into the users table
                         $handle = fopen($targetFile, "r");
                         if ($handle !== FALSE) {
-
                             // Skip the first row (headers)
                             fgetcsv($handle, 1000, ",");
+
+                            // Start SQL transaction
+                            $db->exec('BEGIN TRANSACTION');
 
                             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                                 $id = $db->escapeString($data[0]); // Assuming Id is the first column
@@ -148,11 +157,14 @@
                                 $initials = $db->escapeString($data[3]);
                                 $age = intval($data[4]);
                                 $dob = $db->escapeString($data[5]);
-                            
+                                
                                 // Insert data into the users table
                                 $db->exec("INSERT INTO Users (Id, Name, Surname, Initials, Age, DateOfBirth) 
-                                           VALUES ('$id', '$name', '$surname', '$initials', $age, '$dob')");                            
+                                           VALUES ('$id', '$name', '$surname', '$initials', $age, '$dob')");
                             }
+
+                            // Commit SQL transaction
+                            $db->exec('COMMIT');
                             fclose($handle);
 
                             // Provide a success message
