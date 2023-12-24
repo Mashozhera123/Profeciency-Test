@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,6 +47,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            margin-top: 10px; /* Add margin to the top */
         }
 
         button:hover {
@@ -66,57 +68,77 @@
 
 <body>
     <div class="container">
-        <?php
+    <?php
+// Pulling the MongoDB driver from the vendor
+require_once '../vendor/autoload.php';
 
-        // Pulling the MongoDB driver from the vendor
-        require_once '../vendor/autoload.php';
+// Connect to MongoDB
+$client = new MongoDB\Client;
+$database = $client->mydatabase; 
+$collection = $database->users;
 
-        // Connect to MongoDB
-        $client = new MongoDB\Client;
-        $database = $client->mydatabase; // Replace 'mydatabase' with your actual database name
-        $collection = $database->users;
+// Handle form submission and validation
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = $_POST['name'];
+    $surname = $_POST['surname'];
+    $idNumber = $_POST['idNumber'];
+    $dob = $_POST['dob'];
 
-        // Handle form submission
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = $_POST['name'];
-            $surname = $_POST['surname'];
-            $idNumber = $_POST['idNumber'];
-            $dob = $_POST['dob'];
+    function isValidData($name, $surname, $idNumber, $dob)
+    {
+        // Validate data
+        $errors = [];
+        if (empty($name)) {
+            $errors[] = 'Name is required.';
+        }
+        if (empty($surname)) {
+            $errors[] = 'Surname is required.';
+        }
+        if (!is_numeric($idNumber) || strlen($idNumber) !== 13) {
+            $errors[] = 'ID Number must be a 13-digit numeric value.';
+        }
+        if (!preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dob)) {
+            $errors[] = 'Invalid date format. Please use dd/mm/YYYY.';
+        }
 
-            function isValidData($name, $surname, $idNumber, $dob)
-            {
-                // Validate data
-                return (
-                    !empty($name) &&
-                    !empty($surname) &&
-                    is_numeric($idNumber) &&
-                    strlen($idNumber) === 13 &&
-                    preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dob)
-                );
-            }
+        return [
+            'valid' => empty($errors),
+            'errors' => $errors,
+        ];
+    }
 
-            if (isValidData($name, $surname, $idNumber, $dob)) {
-                try {
-                    // Convert the date to MongoDB\BSON\UTCDateTime
-                    $dobDateTime = new MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000);
+    $validationResult = isValidData($name, $surname, $idNumber, $dob);
 
-                    // Save to MongoDB
-                    $collection->insertOne([
-                        'name' => $name,
-                        'surname' => $surname,
-                        'idNumber' => $idNumber,
-                        'dob' => $dobDateTime,
-                    ]);
+    if ($validationResult['valid']) {
+        try {
+            // Convert the date to MongoDB\BSON\UTCDateTime
+            $dobDateTime = new MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000);
 
-                    echo '<p class="success-message">Data saved successfully!</p>';
-                } catch (Exception $e) {
-                    echo '<p class="error-message">Error saving data. Please try again.</p>';
-                }
-            } else {
-                echo '<p class="error-message">Invalid data. Please check your input.</p>';
+            // Save to MongoDB
+            $collection->insertOne([
+                'name' => $name,
+                'surname' => $surname,
+                'idNumber' => $idNumber,
+                'dob' => $dobDateTime,
+            ]);
+        } catch (Exception $e) {
+            $validationResult['valid'] = false;
+            $validationResult['errors'][] = 'Error saving data. Please try again.';
+        }
+    }
+
+    // Output success or error messages
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($validationResult['valid']) {
+            echo '<p class="success-message">Data saved successfully!</p>';
+        } else {
+            foreach ($validationResult['errors'] as $error) {
+                echo '<p class="error-message">' . $error . '</p>';
             }
         }
-        ?>
+    }
+}
+?>
         <button onclick="window.location.href='http://localhost/mongo/index.php'">Return to Home</button>
     </div>
 </body>

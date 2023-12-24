@@ -7,7 +7,7 @@ use MongoDB\Client;
 
 // Connect to MongoDB
 $client = new MongoDB\Client;
-$database = $client->mydatabase; // Replace 'mydatabase' with your actual database name
+$database = $client->mydatabase; 
 $collection = $database->users;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
