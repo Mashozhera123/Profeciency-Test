@@ -56,6 +56,11 @@
             color: #008000;
             margin-top: 10px;
         }
+
+        .error-message {
+            color: #ff0000;
+            margin-top: 10px;
+        }
     </style>
 </head>
 
@@ -66,8 +71,6 @@
         // Pulling the MongoDB driver from the vendor
         require_once '../vendor/autoload.php';
 
-        use MongoDB\BSON\UTCDateTime;
-
         // Connect to MongoDB
         $client = new MongoDB\Client;
         $database = $client->mydatabase; // Replace 'mydatabase' with your actual database name
@@ -77,7 +80,7 @@
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
             $surname = $_POST['surname'];
-            $idNumber = $_POST['idNumber']; // Cast to integer
+            $idNumber = $_POST['idNumber'];
             $dob = $_POST['dob'];
 
             function isValidData($name, $surname, $idNumber, $dob)
@@ -88,33 +91,33 @@
                     !empty($surname) &&
                     is_numeric($idNumber) &&
                     strlen($idNumber) === 13 &&
-                    preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dob)  // Adjusted regex for dd/mm/YYYY format
+                    preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dob)
                 );
             }
 
             if (isValidData($name, $surname, $idNumber, $dob)) {
-                // Convert the date to MongoDB\BSON\UTCDateTime
-                $dobDateTime = new \MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000);
+                try {
+                    // Convert the date to MongoDB\BSON\UTCDateTime
+                    $dobDateTime = new MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000);
 
-                // Save to MongoDB
-                $collection->insertOne([
-                    'name' => $name,
-                    'surname' => $surname,
-                    'idNumber' => $idNumber,
-                    'dob' => $dobDateTime,
-                ]);
+                    // Save to MongoDB
+                    $collection->insertOne([
+                        'name' => $name,
+                        'surname' => $surname,
+                        'idNumber' => $idNumber,
+                        'dob' => $dobDateTime,
+                    ]);
 
-                echo '<p class="success-message">Data saved successfully!</p>';
+                    echo '<p class="success-message">Data saved successfully!</p>';
+                } catch (Exception $e) {
+                    echo '<p class="error-message">Error saving data. Please try again.</p>';
+                }
             } else {
                 echo '<p class="error-message">Invalid data. Please check your input.</p>';
             }
         }
         ?>
-<button onclick="window.location.href='http://localhost/mongo/index.php'">Return to Home</button>
+        <button onclick="window.location.href='http://localhost/mongo/index.php'">Return to Home</button>
     </div>
 </body>
-
 </html>
-
-
-
