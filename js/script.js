@@ -77,3 +77,13 @@ function clearSessionData() {
         method: 'POST',
     });
 }
+
+function clearSessionAndRedirect() {
+    // Using fetch to clear session data on the server side
+    fetch('/mongo/Task%201/clear_session_data.php', {
+        method: 'POST',
+    }).then(() => {
+        // Redirect to the home page
+        window.location.href = 'http://localhost/mongo/Task%201/index.php';
+    });
+}
