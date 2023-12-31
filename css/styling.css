@@ -184,3 +184,6 @@ input[type="date"]:focus {
     margin-top: 10px;
     font-size: 14px;
 }
+.upload-instructions {
+    color: red;
+}

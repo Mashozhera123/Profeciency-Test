@@ -3,99 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/mongo/css/styling.css">
+    <script src="/mongo/js/script.js"></script>
     <title>CSV Upload to SQLite Database</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        input[type="file"] {
-            display: none;
-        }
-
-        label {
-            display: block;
-            margin: 20px 0;
-            padding: 10px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        label:hover {
-            background-color: #45a049;
-        }
-
-        #upload-btn-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        #upload-btn-wrapper input[type=file] {
-            font-size: 100px;
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-        }
-
-        #upload-btn-wrapper .btn {
-            border: 2px solid gray;
-            color: gray;
-            background-color: white;
-            padding: 8px 20px;
-            border-radius: 8px;
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        #upload-btn-wrapper .btn:hover {
-            border-color: #4CAF50;
-            color: #4CAF50;
-        }
-
-        .file-name {
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .success-message {
-            color: green;
-            margin-top: 20px;
-        }
-
-        .error-message {
-            color: red;
-            margin-top: 20px;
-        }
-    </style>
 </head>
 <body>
 <div class="container">
         <h2>Upload CSV to SQLite Database</h2>
 
         <form action="" method="post" enctype="multipart/form-data">
+        <p>Step 1:Click the button below to select a CSV file for uploading</p>
             <div id="upload-btn-wrapper">
                 <label for="csv-file" class="btn">Choose a CSV file</label>
                 <input type="file" name="csv-file" id="csv-file" accept=".csv" onchange="displayFileName()">
             </div>
             <p class="file-name" id="file-name-display"></p>
             <br>
+            <p>Step 2:Click the button below to upload CSV</p>
             <button type="submit">Upload</button>
         </form>
 
@@ -182,14 +106,6 @@ ini_set('memory_limit', '512M');  // Adjust the memory limit as needed
             }
         }
         ?>
-
-        <script>
-            function displayFileName() {
-                var fileNameDisplay = document.getElementById("file-name-display");
-                var inputFile = document.getElementById("csv-file");
-                fileNameDisplay.innerText = "Selected file: " + inputFile.files[0].name;
-            }
-        </script>
     </div>
 </body>
 </html>

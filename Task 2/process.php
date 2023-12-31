@@ -3,102 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/mongo/css/styling.css">
+    <script src="/mongo/js/script.js"></script>
     <title>Data Generation Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        form {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 12px;
-            box-sizing: border-box;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        p {
-            margin-top: 20px;
-        }
-
-        a {
-            text-decoration: none;
-            color: #4CAF50; /* Change link color */
-        }
-
-        .download-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .success-message {
-            color: green;
-        }
-
-        .download-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            text-decoration: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .download-button:hover {
-            background-color: #45a049;
-        }
-
-        .upload-link {
-            display: block; /* Make the link a block-level element for spacing */
-            margin-top: 10px;
-        }
-
-        .upload-link:hover {
-            text-decoration: underline;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <form id="data-form" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
-            <label for="amount">Enter the amount of data to generate:</label>
-            <input type="number" id="amount" name="amount" value="1" min="1" required>
-            <button type="submit">Generate Data</button>
-        </form>
-
         <?php
 set_time_limit(0);
 ini_set('memory_limit', '256M');
@@ -152,7 +61,9 @@ function generateCSV($numVariations, $batchSize = 1000) {
     // Provide a download link for the generated CSV file
     echo '<div class="download-container">';
     echo '<p class="success-message">CSV file generated successfully!</p>';
+    echo '<p style="color: red;">Step 1: Click the button below to download your CSV flie.</p>';
     echo '<a class="download-button" href="output.csv" download><button>Download CSV</button></a>';
+    echo '<p style="color: red;">Step 2: Once the download is complete, please click the link below <br>to upload your CSV file to the database.</p>';
     echo '<a class="upload-link" href="upload2database.php">Upload CSV to SQLite Database</a>';
     echo '</div>';
     echo '<script>document.getElementById("data-form").style.display = "none";</script>';

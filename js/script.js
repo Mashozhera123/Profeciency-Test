@@ -87,3 +87,9 @@ function clearSessionAndRedirect() {
         window.location.href = 'http://localhost/mongo/Task%201/index.php';
     });
 }
+
+function displayFileName() {
+    var fileNameDisplay = document.getElementById("file-name-display");
+    var inputFile = document.getElementById("csv-file");
+    fileNameDisplay.innerText = "Selected file: " + inputFile.files[0].name;
+}
