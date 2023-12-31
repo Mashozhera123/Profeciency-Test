@@ -83,7 +83,7 @@ ini_set('memory_limit', '512M');  // Adjust the memory limit as needed
                                 $dob = $db->escapeString($data[5]);
                                 
                                 // Insert data into the users table
-                                $db->exec("INSERT INTO Users (Id, Name, Surname, Initials, Age, DateOfBirth) 
+                                $db->exec("INSERT INTO csv_import (Id, Name, Surname, Initials, Age, DateOfBirth) 
                                            VALUES ('$id', '$name', '$surname', '$initials', $age, '$dob')");
                             }
 
