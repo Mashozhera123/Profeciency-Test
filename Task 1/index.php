@@ -1,4 +1,5 @@
 <?php
+//  executed after the user fills and sucodebmits the form
 session_start();
 
 // Pulling the MongoDB driver from the vendor
@@ -85,7 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Clear form data from session
     unset($_SESSION['form_data']);
 }
-
 ?>
 
 <!DOCTYPE html>
