@@ -1,14 +1,18 @@
 <?php
-//  executed after the user fills and sucodebmits the form
+// executed after the user fills and submits the form
 session_start();
 
 // Pulling the MongoDB driver from the vendor
 require_once '../vendor/autoload.php';
 
 // Connect to MongoDB
-$client = new MongoDB\Client;
-$database = $client->mydatabase;
-$collection = $database->users;
+try {
+    $client = new MongoDB\Client;
+    $database = $client->mydatabase;
+    $collection = $database->users;
+} catch (Exception $e) {
+    die('Error connecting to MongoDB: ' . $e->getMessage());
+}
 
 // Add a unique index to the idNumber field
 $collection->createIndex(['idNumber' => 1], ['unique' => true]);
@@ -22,6 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     function isValidData($name, $surname, $idNumber, $dob)
     {
+        global $collection; // Access the global variable
+
         // Validate data
         $errors = [];
         if (empty($name)) {
@@ -35,6 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if (!preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dob)) {
             $errors[] = 'Invalid date format. Please use dd/mm/YYYY.';
+        }
+
+        // Check if a user with the same ID and date of birth already exists
+        $existingUser = $collection->findOne(['idNumber' => $idNumber, 'dob' => new MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000)]);
+
+        if ($existingUser) {
+            $errors[] = 'User with the same ID and date of birth already exists.';
         }
 
         return [
