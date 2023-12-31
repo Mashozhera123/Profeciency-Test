@@ -1,10 +1,14 @@
 # Project README
 
-This repository contains a web application for managing user data using MongoDB. The application is built using PHP for server-side scripting, MongoDB as the database, and JavaScript for client-side validation. The primary functionality includes data submission, validation, and interaction with the MongoDB database.
+This repository combines two web applications: one for managing user data using MongoDB and another for generating and uploading CSV data to an SQLite database.
 
-## Getting Started
+## MongoDB User Data Management
 
-To run this application locally, follow the steps below:
+This part of the project is built using PHP for server-side scripting, MongoDB as the database, and JavaScript for client-side validation. The primary functionality includes data submission, validation, and interaction with the MongoDB database.
+
+### Getting Started
+
+To run the MongoDB User Data Management application locally, follow the steps below:
 
 1. **Clone the Repository:**
    ```
@@ -27,16 +31,16 @@ To run this application locally, follow the steps below:
      ```
    - Access the application in your web browser at `http://localhost:8000/mongo/Task%201/index.php`.
 
-## Form Validation
+### Form Validation
 
 The application includes client-side form validation using JavaScript. The validation checks are defined in the `script.js` file. The primary validation checks include:
 
 - **Date Format:** Ensures that the date of birth is entered in the format `dd/mm/YYYY`.
 - **Date Validity:** Validates the entered date for correctness using the JavaScript `Date` object.
 
-## JavaScript Functions
+### JavaScript Functions
 
-The `script.js` file includes the following JavaScript functions:
+The `script.js` file includes JavaScript functions for form validation and interaction with the server:
 
 - **validateForm():** Validates the entire form before submission, calling additional validation checks, and clearing form data from the session.
 
@@ -50,10 +54,35 @@ The `script.js` file includes the following JavaScript functions:
 
 - **clearSessionAndRedirect():** Combines clearing session data and redirecting to the home page.
 
-## Contributing
+## Data Generation and CSV Upload to SQLite Database
 
-Contributions are welcome! If you find any issues or have improvements to suggest, feel free to open an issue or create a pull request.
+This part of the project generates random data, creates a CSV file, and provides functionality to upload the CSV data to an SQLite database.
 
-## License
+### Instructions
 
- Feel free to use, modify, and distribute the code.
+1. Open `index.html` in a web browser.
+2. Enter the desired amount of data to generate in the provided form.
+3. Click the "Generate Data" button.
+4. Download the generated CSV file by clicking the download button.
+5. Optionally, proceed to upload the CSV file to the database using the link provided.
+
+### CSV Upload to SQLite Database
+
+1. Open `upload2database.php` in a web browser.
+2. Follow the provided steps:
+   - Click the "Choose a CSV file" button to select a CSV file for uploading.
+   - Click the "Upload" button to upload the selected CSV file.
+3. Check for success or error messages displayed on the page.
+4. If successful, the CSV data has been uploaded to the SQLite database.
+
+## Notes
+
+- **Memory Limit:** The PHP scripts may set and adjust memory limits to handle large data generation or file uploads. Please ensure your server configuration allows for these adjustments.
+
+- **File Paths:** Ensure that the necessary paths for CSS, JavaScript, and SQLite database are correctly configured based on your project structure.
+
+- **SQLite Database:** The project assumes an SQLite database named `myDatabase.db` and a table named `csv_import` for storing CSV data. Make sure the SQLite database is properly configured and accessible.
+
+**Author:** Nigel Mashozhera
+
+Feel free to use, modify, and distribute the code. Contributions are welcome! If you find any issues or have improvements to suggest, feel free to open an issue or create a pull request.
