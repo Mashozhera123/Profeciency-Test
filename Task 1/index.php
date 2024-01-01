@@ -31,23 +31,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validate data
         $errors = [];
         if (empty($name)) {
-            $errors[] = 'Name is required.';
+            $errors['name'] = 'Name is required.';
         }
         if (empty($surname)) {
-            $errors[] = 'Surname is required.';
+            $errors['surname'] = 'Surname is required.';
         }
+
+        // Check if ID number starts with the year/month/day of birth
+        $dobWithoutSlash = str_replace('/', '', $dob);
+        if (strpos($idNumber, $dobWithoutSlash) !== 0) {
+            $errors['idNumber'] = 'Invalid ID number: SA ID Number must start with the year/month/day of your birthday.';
+        }
+
         if (!is_numeric($idNumber) || strlen($idNumber) !== 13) {
-            $errors[] = 'ID Number must be a 13-digit numeric value.';
+            $errors['idNumber'] = 'ID Number must be a 13-digit numeric value.';
         }
         if (!preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dob)) {
-            $errors[] = 'Invalid date format. Please use dd/mm/YYYY.';
+            $errors['dob'] = 'Invalid date format. Please use dd/mm/YYYY.';
         }
 
         // Check if a user with the same ID and date of birth already exists
         $existingUser = $collection->findOne(['idNumber' => $idNumber, 'dob' => new MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000)]);
 
         if ($existingUser) {
-            $errors[] = 'User with the same ID and date of birth already exists.';
+            $errors['idNumber'] = 'User with the same ID and date of birth already exists.';
         }
 
         return [
@@ -73,6 +80,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Output success message
             $_SESSION['success_message'] = 'Data saved successfully! Please enter new data below.';
+
+            // Redirect to clear the form
+            header('Location: http://localhost/mongo/Task%201/index.php');
+            exit();
         } catch (MongoDB\Driver\Exception\BulkWriteException $e) {
             // Duplicate key error, handle accordingly
             $_SESSION['error_message'] = 'This ID Number already exists. Please check your input.';
@@ -89,15 +100,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (Exception $e) {
             // Other errors
             $validationResult['valid'] = false;
-            $validationResult['errors'][] = 'Error saving data. Please try again.';
+            $validationResult['errors']['general'] = 'Error saving data. Please try again.';
         }
     }
 
     // Store validation errors and valid data in the session
     $_SESSION['validation_errors'] = $validationResult['errors'];
 
-    // Clear form data from session
-    unset($_SESSION['form_data']);
+    // Store form data in the session for repopulating the form
+    $_SESSION['form_data'] = [
+        'name' => $name,
+        'surname' => $surname,
+        'idNumber' => $idNumber,
+        'dob' => $dob,
+    ];
+
+    // Redirect back to index.php to display errors
+    header('Location: http://localhost/mongo/Task%201/index.php');
+    exit();
 }
 ?>
 
@@ -147,31 +167,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required placeholder="Enter your name"
                value="<?php echo htmlspecialchars($form_data['name']); ?>">
+        <?php echo isset($_SESSION['validation_errors']['name']) ? '<p class="error-message">' . htmlspecialchars($_SESSION['validation_errors']['name']) . '</p>' : ''; ?>
 
         <label for="surname">Surname:</label>
         <input type="text" id="surname" name="surname" required placeholder="Enter your surname"
                value="<?php echo htmlspecialchars($form_data['surname']); ?>">
+        <?php echo isset($_SESSION['validation_errors']['surname']) ? '<p class="error-message">' . htmlspecialchars($_SESSION['validation_errors']['surname']) . '</p>' : ''; ?>
 
         <label for="idNumber">ID Number:</label>
         <input type="text" id="idNumber" name="idNumber" pattern="\d{13}"
                required placeholder="Enter your 13-digit ID Number" oninput="setCustomValidity('')"
                value="<?php echo htmlspecialchars($form_data['idNumber']); ?>">
+        <?php echo isset($_SESSION['validation_errors']['idNumber']) ? '<p class="error-message">' . htmlspecialchars($_SESSION['validation_errors']['idNumber']) . '</p>' : ''; ?>
         <span id="idNumberError"
               class="error"><?php echo isset($_SESSION['error_message']) ? htmlspecialchars($_SESSION['error_message']) : ''; ?></span>
 
         <label for="dob">Date of Birth (dd/mm/YYYY):</label>
         <input type="text" id="dob" name="dob" required placeholder="Enter your date of birth"
                value="<?php echo htmlspecialchars($form_data['dob']); ?>">
+        <?php echo isset($_SESSION['validation_errors']['dob']) ? '<p class="error-message">' . htmlspecialchars($_SESSION['validation_errors']['dob']) . '</p>' : ''; ?>
         <div id="dobErrorContainer" class="error-container">
             <span id="dobError" class="error"></span>
         </div>
 
-        <!-- Display validation errors -->
+        <!-- Display general validation errors -->
         <?php
-        if (isset($_SESSION['validation_errors'])) {
-            foreach ($_SESSION['validation_errors'] as $error) {
-                echo '<p class="error-message">' . htmlspecialchars($error) . '</p>';
-            }
+        if (isset($_SESSION['validation_errors']['general'])) {
+            echo '<p class="error-message">' . htmlspecialchars($_SESSION['validation_errors']['general']) . '</p>';
         }
         ?>
 
