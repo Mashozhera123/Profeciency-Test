@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Check if a user with the same ID and date of birth already exists
-        $existingUser = $collection->findOne(['idNumber' => $idNumber, 'dob' => new MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000)]);
+        $existingUser = $collection->findOne(['idNumber' => (int)$idNumber, 'dob' => new MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000)]);
 
         if ($existingUser) {
             $errors['idNumber'] = 'User with the same ID and date of birth already exists.';
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $collection->insertOne([
                 'Name' => $name,
                 'Surname' => $surname,
-                'ID Number' => $idNumber,
+                'ID Number' => (int)$idNumber, // Ensure it is saved as an integer
                 'Date of Birth' => $dobDateTime,
             ]);
 
