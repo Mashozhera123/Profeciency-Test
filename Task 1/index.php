@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors['idNumber'] = 'Invalid ID number: SA ID Number must start with the year/month/day of your birthday.';
         }
 
-        if (!is_numeric($idNumber) || strlen($idNumber) !== 13) {
+        if (!ctype_digit($idNumber) || strlen($idNumber) !== 13) {
             $errors['idNumber'] = 'ID Number must be a 13-digit numeric value.';
         }
         if (!preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dob)) {
@@ -72,10 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Save to MongoDB
             $collection->insertOne([
-                'name' => $name,
-                'surname' => $surname,
-                'idNumber' => $idNumber,
-                'dob' => $dobDateTime,
+                'Name' => $name,
+                'Surname' => $surname,
+                'ID Number' => $idNumber,
+                'Date of Birth' => $dobDateTime,
             ]);
 
             // Output success message
