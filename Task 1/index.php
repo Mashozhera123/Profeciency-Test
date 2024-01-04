@@ -38,6 +38,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors['surname'] = 'Surname is required.';
         }
 
+        $dobWithoutSlash = str_replace('/', '', $dob);
+        if (strpos($idNumber, $dobWithoutSlash) !== 0) {
+            $errors['idNumber'] = 'Invalid ID number: SA ID Number must start with the year/month/day of your birthday.';
+        }
+        
         if ($idNumber !== null) {
             if (!preg_match('/^\d{13}$/', $idNumber)) {
                 $errors['idNumber'] = 'ID Number must be a 13-digit numeric value.';

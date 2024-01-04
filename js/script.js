@@ -68,25 +68,7 @@ function clearErrorMessage(elementId) {
     errorElement.innerText = '';
 }
 
-/**
- * Clears form data from session.
- */
-function clearSessionData() {
-    // Using fetch to clear session data on the server side
-    fetch('/mongo/Task%201/clear_session_data.php', {
-        method: 'POST',
-    });
-}
-
-function clearSessionAndRedirect() {
-    // Using fetch to clear session data on the server side
-    fetch('/mongo/Task%201/clear_session_data.php', {
-        method: 'POST',
-    }).then(() => {
-        // Redirect to the home page
-        window.location.href = 'http://localhost/mongo/Task%201/index.php';
-    });
-}
+// displays the name of the selected file in an HTML element. 
 
 function displayFileName() {
     var fileNameDisplay = document.getElementById("file-name-display");
