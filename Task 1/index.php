@@ -14,20 +14,21 @@ try {
     die('Error connecting to MongoDB: ' . $e->getMessage());
 }
 
-// Add a unique index to the idNumber field
-$collection->createIndex(['idNumber' => 1], ['unique' => true]);
+// Remove existing indexes
+$collection->dropIndexes();
+
+// Create a unique index on the "ID Number" field
+$collection->createIndex(['ID Number' => 1], ['unique' => true]);
 
 // Handle form submission and validation
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $surname = $_POST['surname'];
-    $idNumber = $_POST['idNumber'];
+    $idNumber = isset($_POST['idNumber']) ? (int)$_POST['idNumber'] : null; // Treat it as an integer if not null
     $dob = $_POST['dob'];
 
     function isValidData($name, $surname, $idNumber, $dob)
     {
-        global $collection; // Access the global variable
-
         // Validate data
         $errors = [];
         if (empty($name)) {
@@ -37,44 +38,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors['surname'] = 'Surname is required.';
         }
 
-        // Check if ID number starts with the year/month/day of birth
-        $dobWithoutSlash = str_replace('/', '', $dob);
-        if (strpos($idNumber, $dobWithoutSlash) !== 0) {
-            $errors['idNumber'] = 'Invalid ID number: SA ID Number must start with the year/month/day of your birthday.';
+        if ($idNumber !== null) {
+            if (!preg_match('/^\d{13}$/', $idNumber)) {
+                $errors['idNumber'] = 'ID Number must be a 13-digit numeric value.';
+            }
         }
 
-        if (!ctype_digit($idNumber) || strlen($idNumber) !== 13) {
-            $errors['idNumber'] = 'ID Number must be a 13-digit numeric value.';
-        }
         if (!preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dob)) {
             $errors['dob'] = 'Invalid date format. Please use dd/mm/YYYY.';
         }
 
-        // Check if a user with the same ID and date of birth already exists
-        $existingUser = $collection->findOne(['idNumber' => (int)$idNumber, 'dob' => new MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000)]);
-
-        if ($existingUser) {
-            $errors['idNumber'] = 'User with the same ID and date of birth already exists.';
-        }
-
-        return [
-            'valid' => empty($errors),
-            'errors' => $errors,
-        ];
+        return $errors;
     }
 
-    $validationResult = isValidData($name, $surname, $idNumber, $dob);
+    // Validate the data
+    $validationErrors = isValidData($name, $surname, $idNumber, $dob);
 
-    if ($validationResult['valid']) {
+    if (empty($validationErrors)) {
         try {
             // Convert the date to MongoDB\BSON\UTCDateTime
             $dobDateTime = new MongoDB\BSON\UTCDateTime(strtotime(str_replace('/', '-', $dob)) * 1000);
 
-            // Save to MongoDB
+            // Save to MongoDB (let MongoDB enforce unique constraint)
             $collection->insertOne([
                 'Name' => $name,
                 'Surname' => $surname,
-                'ID Number' => (int)$idNumber, // Ensure it is saved as an integer
+                'ID Number' => $idNumber, // Ensure it is saved as an integer
                 'Date of Birth' => $dobDateTime,
             ]);
 
@@ -99,27 +88,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         } catch (Exception $e) {
             // Other errors
-            $validationResult['valid'] = false;
-            $validationResult['errors']['general'] = 'Error saving data. Please try again.';
+            $_SESSION['error_message'] = 'Error saving data. Please try again.';
         }
+    } else {
+        // Display validation errors
+        $_SESSION['validation_errors'] = $validationErrors;
+        $_SESSION['form_data'] = [
+            'name' => $name,
+            'surname' => $surname,
+            'idNumber' => $idNumber,
+            'dob' => $dob,
+        ];
+
+        // Redirect back to index.php to display errors
+        header('Location: http://localhost/mongo/Task%201/index.php');
+        exit();
     }
-
-    // Store validation errors and valid data in the session
-    $_SESSION['validation_errors'] = $validationResult['errors'];
-
-    // Store form data in the session for repopulating the form
-    $_SESSION['form_data'] = [
-        'name' => $name,
-        'surname' => $surname,
-        'idNumber' => $idNumber,
-        'dob' => $dob,
-    ];
-
-    // Redirect back to index.php to display errors
-    header('Location: http://localhost/mongo/Task%201/index.php');
-    exit();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
